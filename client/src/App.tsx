@@ -8,7 +8,7 @@ import {
 import { GithubIcon, LinkedinIcon } from './components/Icons';
 
 
-const API_URL = 'http://localhost:5000/api/portfolio';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/portfolio';
 
 export const App: React.FC = () => {
   const { data, isLoading, error } = usePortfolio(API_URL);
