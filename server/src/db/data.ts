@@ -36,22 +36,24 @@ export const portfolioDb: Profile = {
         }
     ],
     projects: [
+        // server/src/db/data.ts
         {
             id: "kms-rag-pipeline",
-            title: "Enterprise KMS & Dual-Stream RAG Pipeline",
-            description: "Modul Knowledge Management System (KMS) & mesin RAG untuk regulasi perbankan. Mengintegrasikan frontend-backend KMS dengan sistem LUKMAI, serta mengorkestrasi pipeline ingestion dokumen skala besar dan query reasoning berbasis n8n.",
+            title: "Enterprise Knowledge Base & Dual-Stream RAG Engine",
+            description: "Modul Knowledge Management System (KMS) & mesin RAG untuk pengolahan dokumen regulasi dan kepatuhan berskala enterprise. Mengintegrasikan arsitektur full-stack dengan ekosistem AI internal perusahaan, serta mengorkestrasi pipeline ingestion dokumen kompleks dan query reasoning bertenaga n8n.",
             category: "AI / ML",
             tags: ["TypeScript", "React", "n8n", "PostgreSQL", "pgvector", "LiteLLM", "Docling", "BGE-M3"],
             featured: true,
             isPrivate: true,
-            companyBadge: "Enterprise / Private",
+            companyBadge: "Enterprise / Confidential",
             highlights: [
-                "Merancang orkestrasi n8n untuk batch ingestion PDF per 25 halaman dengan Docling parser & fallback layout extraction.",
-                "Mengimplementasikan pencarian semantik vektor (BGE-M3 + pgvector) berbasis dual-stream (Sumber Resmi vs Penunjang AI).",
-                "Membangun prompt pipeline dengan HyDE (Hypothetical Document Embeddings) dan Reciprocal Rank Fusion (RRF).",
-                "Integrasi full-stack frontend & backend KMS dengan sistem LUKMAI berbasis role-based access control (RBAC)."
+                "Merancang orkestrasi n8n untuk batch ingestion ribuan halaman dokumen PDF menggunakan Docling async parser & fallback layout extraction.",
+                "Mengimplementasikan pencarian semantik vektor (BGE-M3 + pgvector) berbasis dual-stream (Sumber Resmi Regulasi vs Penunjang AI).",
+                "Membangun prompt reasoning pipeline dengan HyDE (Hypothetical Document Embeddings) dan Reciprocal Rank Fusion (RRF).",
+                "Integrasi antarmuka full-stack frontend & backend KMS ke ekosistem AI internal perusahaan berbasis Role-Based Access Control (RBAC)."
             ]
         },
+
         {
             id: "mini-dashboard-ai",
             title: "Mini Dashboard AI 🚀",
