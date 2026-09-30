@@ -7,9 +7,6 @@ import {
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './components/Icons';
 
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/portfolio';
-
 export const App: React.FC = () => {
   const { data, isLoading, error } = usePortfolio();
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -27,7 +24,7 @@ export const App: React.FC = () => {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
         <Loader2 className="animate-spin" size={40} color="#3b82f6" style={{ animation: 'spin 1s linear infinite' }} />
-        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Menghubungkan ke Backend API (port 5000)...</p>
+        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Memuat data portofolio...</p>
       </div>
     );
   }
