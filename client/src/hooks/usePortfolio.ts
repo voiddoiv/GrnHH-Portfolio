@@ -1,9 +1,10 @@
 // client/src/hooks/usePortfolio.ts
 import { useState, useEffect } from 'react';
 import { type Profile, ProfileSchema } from '../schemas/portfolio';
-import { fallbackData } from '../data/fallbackData'; // Data cadangan jika backend offline
+import { fallbackData } from '../data/fallbackData';
+import { supabase } from '../services/supabase';
 
-export const usePortfolio = (apiUrl: string) => {
+export const usePortfolio = () => {
     const [data, setData] = useState<Profile | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -11,40 +12,74 @@ export const usePortfolio = (apiUrl: string) => {
     useEffect(() => {
         let isMounted = true;
 
-        const fetchData = async () => {
+        const fetchFromSupabase = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
 
-                // Beri batas waktu (timeout 3 detik) agar tidak menunggu terlalu lama jika API mati
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                // 1. Ambil data Profile, Skills, dan Projects secara paralel dari PostgreSQL
+                const [profileRes, skillsRes, projectsRes] = await Promise.all([
+                    supabase.from('profile').select('*').single(),
+                    supabase.from('skills').select('*').order('id', { ascending: true }),
+                    supabase.from('projects').select('*').order('created_at', { ascending: false }),
+                ]);
 
-                const res = await fetch(apiUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                if (profileRes.error) throw profileRes.error;
+                if (skillsRes.error) throw skillsRes.error;
+                if (projectsRes.error) throw projectsRes.error;
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const json = await res.json();
-                const parsed = ProfileSchema.parse(json);
+                const p = profileRes.data;
 
-                if (isMounted) setData(parsed);
+                // 2. Susun data mentah dari tabel database ke bentuk Profile schema kita
+                const assembledData = {
+                    name: p.name,
+                    headline: p.headline,
+                    summary: p.summary,
+                    availabilityStatus: p.availability_status,
+                    contact: {
+                        email: p.email,
+                        github: p.github,
+                        linkedin: p.linkedin,
+                    },
+                    skills: skillsRes.data.map(s => ({
+                        name: s.name,
+                        category: s.category,
+                        level: s.level,
+                    })),
+                    experiences: fallbackData.experiences,
+                    projects: projectsRes.data.map(proj => ({
+                        id: proj.id,
+                        title: proj.title,
+                        description: proj.description,
+                        category: proj.category,
+                        tags: proj.tags || [],
+                        featured: proj.featured || false,
+                        isPrivate: proj.is_private || false,
+                        companyBadge: proj.company_badge || undefined,
+                        githubUrl: proj.github_url || '',
+                        demoUrl: proj.demo_url || '',
+                        highlights: proj.highlights || [],
+                    })),
+                };
+
+                // 3. Validasi dengan Zod (Garansi Type-Safe)
+                const validated = ProfileSchema.parse(assembledData);
+
+                if (isMounted) setData(validated);
             } catch (err: any) {
-                if (isMounted) {
-                    console.warn("Backend offline / unreachable, beralih ke Fallback Data:", err.message);
-                    // JIKA BACKEND GAGAL (di HP), PAKAI DATA CADANGAN:
-                    setData(fallbackData);
-                }
+                console.warn('Gagal memuat dari Supabase, beralih ke Fallback Data:', err.message);
+                if (isMounted) setData(fallbackData);
             } finally {
                 if (isMounted) setIsLoading(false);
             }
         };
 
-        fetchData();
+        fetchFromSupabase();
 
         return () => {
             isMounted = false;
         };
-    }, [apiUrl]);
+    }, []);
 
     return { data, isLoading, error };
 };
