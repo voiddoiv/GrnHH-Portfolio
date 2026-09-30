@@ -1,6 +1,7 @@
 // client/src/hooks/usePortfolio.ts
 import { useState, useEffect } from 'react';
 import { type Profile, ProfileSchema } from '../schemas/portfolio';
+import { fallbackData } from '../data/fallbackData'; // Data cadangan jika backend offline
 
 export const usePortfolio = (apiUrl: string) => {
     const [data, setData] = useState<Profile | null>(null);
@@ -15,28 +16,26 @@ export const usePortfolio = (apiUrl: string) => {
                 setIsLoading(true);
                 setError(null);
 
-                const res = await fetch(apiUrl);
-                if (!res.ok) {
-                    throw new Error(`Server merespon dengan status ${res.status}`);
-                }
+                // Beri batas waktu (timeout 3 detik) agar tidak menunggu terlalu lama jika API mati
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
 
+                const res = await fetch(apiUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const json = await res.json();
-
-                // Validasi runtime dengan Zod
                 const parsed = ProfileSchema.parse(json);
 
-                if (isMounted) {
-                    setData(parsed);
-                }
+                if (isMounted) setData(parsed);
             } catch (err: any) {
                 if (isMounted) {
-                    console.error("Gagal memuat portofolio:", err);
-                    setError(err.message || 'Terjadi kesalahan saat memuat data dari server');
+                    console.warn("Backend offline / unreachable, beralih ke Fallback Data:", err.message);
+                    // JIKA BACKEND GAGAL (di HP), PAKAI DATA CADANGAN:
+                    setData(fallbackData);
                 }
             } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
+                if (isMounted) setIsLoading(false);
             }
         };
 

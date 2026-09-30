@@ -56,7 +56,7 @@ export const portfolioDb: Profile = {
 
         {
             id: "mini-dashboard-ai",
-            title: "Mini Dashboard AI 🚀",
+            title: "Mini Dashboard AI ",
             description: "Proyek arsitektur fullstack enterprise untuk mereplikasi sistem modern berstandar industri dengan end-to-end type safety dan server-side rendering performa tinggi.",
             category: "Web App",
             tags: ["Turborepo", "TanStack Start", "TanStack Router", "TanStack Query", "tRPC v11", "Drizzle ORM", "PostgreSQL", "Nitro", "Vite"],
